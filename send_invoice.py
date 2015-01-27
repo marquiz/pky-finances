@@ -225,7 +225,12 @@ def parse_args(argv):
                         help='Prefix all email subjects with %(metavar)s')
     parser.add_argument('-G', '--group-by', metavar='COLUMN', default='viite',
                         help='Mass-send invoices with the same value of COLUMN')
+    parser.add_argument('-F', '--filter-by', metavar='COLUMN', default='nro',
+                        help='Filter invoices by this COLUMN')
     group = parser.add_mutually_exclusive_group()
+    group.add_argument('-f', '--filter-value',
+                       help='Send invoices having this value in the filter '
+                             'column')
     group.add_argument('-D', '--date', type=std_date,
                        help='Send invoices having this date')
     group.add_argument('-I', '--index',
@@ -257,7 +262,14 @@ def main(argv=None):
         for row in reader:
             all_data.append(dict(zip([val.lower() for val in header_row], row)))
 
-    if args.index:
+    if args.filter_value:
+        if args.filter_by not in all_data[0]:
+            print "Invalid filter column name '%s'" % args.filter_by
+            return 1
+        send_data = [row for row in all_data if
+                        row[u'nro'] and
+                        row[args.filter_by] == args.filter_value]
+    elif args.index:
         send_data = [row for row in all_data if
                         row[u'nro'] and in_range(row[u'nro'], args.index)]
     else:
