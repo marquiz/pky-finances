@@ -337,8 +337,9 @@ def main(argv=None):
             print '-' * 79 + '\n'
             recipients = ['<%s>' % split_email_address(row['email'])[1] for
                             row in group]
-            proceed = ask_value("Send an email like above to %s" %
-                                ', '.join(recipients), choices=['n', 'y'])
+            proceed = ask_value("Send an email like above to %d recipients "
+                            "(%s)" % (len(recipients), ', '.join(recipients)),
+                            choices=['n', 'y'])
             if proceed == 'y':
                 for row in group:
                     to_name, to_email = split_email_address(row['email'])
