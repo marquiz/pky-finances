@@ -309,7 +309,11 @@ def main(argv=None):
 
             # Get greeting message
             if args.message:
-                message = args.message
+                if os.path.isfile(args.message):
+                    with open(args.message) as fobj:
+                        message = fobj.read()
+                else:
+                    message = args.message
             else:
                 message = "Hei,\n\nOhessa lasku."
                 message = ask_value('Greeting message', default=message)
