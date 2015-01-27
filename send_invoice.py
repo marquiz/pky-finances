@@ -24,6 +24,7 @@ import email.charset
 import csv
 import os
 import re
+import readline
 import smtplib
 import string
 import sys
