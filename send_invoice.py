@@ -211,7 +211,7 @@ def parse_args(argv):
                         help='Greeting message, used for all invoices')
     parser.add_argument('--subject',
                         help="Messgae subject, used for all invoices")
-    parser.add_argument('--subject-prefix', metavar='PREFIX', default='',
+    parser.add_argument('--subject-prefix', metavar='PREFIX',
                         help='Prefix all email subjects with %(metavar)s')
     parser.add_argument('-G', '--group-by', metavar='COLUMN', default='viite',
                         help='Mass-send invoices with the same value of COLUMN')
@@ -277,7 +277,11 @@ def main(argv=None):
     server = smtplib.SMTP(smtp_server)
 
     # Get subject prefix
-    subject_prefix = args.subject_prefix or config['subject-prefix']
+    if args.subject_prefix is not None:
+        subject_prefix = args.subject_prefix
+    else:
+        subject_prefix = config['subject-prefix']
+
     try:
         # Group data
         if args.group_by:
