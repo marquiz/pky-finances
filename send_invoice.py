@@ -174,6 +174,14 @@ def ask_value(question, default=None, choices=None):
         elif default is not None:
             return default
 
+def write_log_entry(log_f, msg, row_data):
+    """Write entry to log file"""
+    email = split_email_address(row_data['email'])[1]
+    fields = ['nro', 'selite', 'summa', 'viitenro']
+    details = ' '.join([u'%s: %s' % (field, row_data[field]) for
+                field in fields])
+    log_f.write(('%s to %s: %s\n' % (msg, email, details)).encode('utf-8'))
+
 def parse_config(path):
     """Read config file"""
     defaults = {'smtp-server': '',
@@ -198,6 +206,8 @@ def parse_args(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('-d', '--dry-run', action='store_true',
                         help='Do everything but send email')
+    parser.add_argument('-l', '--log-dir', default='logs',
+                        help='Directory for log files')
     parser.add_argument('--from', dest='sender', type=split_email_address,
                         help="Sender's email")
     parser.add_argument('--cc', action='append', default=[],
@@ -282,6 +292,16 @@ def main(argv=None):
     else:
         subject_prefix = config['subject-prefix']
 
+    # Open initialize log files
+    log_dir = os.path.join(os.path.dirname(argv[0]), args.log_dir)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+    log_f_basename = datetime.now().strftime('%Y-%m-%d-%H%M%S')
+    if args.dry_run:
+        log_f_basename += '-dry-run'
+    log_f = open(os.path.join(log_dir, log_f_basename + '.log'), 'w')
+    emails_f = open(os.path.join(log_dir, log_f_basename + '-emails.txt'), 'w')
+
     try:
         # Group data
         if args.group_by:
@@ -353,17 +373,30 @@ def main(argv=None):
                     headers['to'] = utf8_address_header((to_name, to_email))
                     msg = compose_email(headers, message, row)
                     print "Sending email to <%s>..." % recipients[0]
+
                     if not args.dry_run:
                         rsp = server.sendmail(sender,
                                         recipients, msg.as_string(),
                                         rcpt_options=['NOTIFY=FAILURE,DELAY'])
-                        if rsp:
-                            print "Mail delivery failed: %s" % rsp
+                    else:
+                        rsp = 0
+                    if rsp:
+                        write_log_entry(log_f, 'FAILED', row)
+                        print "Mail delivery failed: %s" % rsp
+                    else:
+                        write_log_entry(log_f, 'OK', row)
+                        emails_f.write('-'*79 + '\n')
+                        emails_f.write(msg.as_string())
+                        emails_f.write('\n')
             else:
                 print "Did not send!"
+                for row in group:
+                    write_log_entry(log_f, 'SKIPPED', row)
 
     finally:
         server.quit()
+        log_f.close()
+        emails_f.close()
 
     return 0
 
