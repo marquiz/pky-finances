@@ -224,6 +224,8 @@ def parse_args(argv):
                         help="Messgae subject, used for all invoices")
     parser.add_argument('--subject-prefix', metavar='PREFIX',
                         help='Prefix all email subjects with %(metavar)s')
+    parser.add_argument('-r', '--reminder', action='store_true',
+                        help='Only send invoices whose due date has passed')
     parser.add_argument('-G', '--group-by', metavar='COLUMN', default='viite',
                         help='Mass-send invoices with the same value of COLUMN')
     parser.add_argument('-F', '--filter-by', metavar='COLUMN', default='nro',
@@ -273,10 +275,23 @@ def main(argv=None):
     elif args.index:
         send_data = [row for row in all_data if
                         row[u'nro'] and in_range(row[u'nro'], args.index)]
-    else:
+    elif args.date or not args.reminder:
         date = args.date or datetime.now().date()
         send_data = [row for row in all_data if
                         row[u'nro'] and std_date(row[u'pvm']) == date]
+    else:
+        send_data = [row for row in all_data if row[u'nro']]
+
+    # Special treatment if reminder emails are requested
+    if args.reminder:
+        # Only take rows whose due date has passed
+        today = datetime.now().date()
+        send_data = [row for row in send_data if
+                        not row[u'maksettu'] and
+                        std_date(row[u'eräpäivä']) < today]
+        # Mangle due dates
+        for row in send_data:
+            row[u'eräpäivä'] = 'HETI'
 
     if not send_data:
         print "No invoices to send, exiting"
