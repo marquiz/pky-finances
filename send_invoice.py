@@ -403,7 +403,7 @@ def main(argv=None):
                     print "Sending email to <%s>..." % recipients[0]
 
                     if not args.dry_run:
-                        rsp = server.sendmail(sender,
+                        rsp = server.sendmail(sender[1],
                                         recipients, msg.as_string(),
                                         rcpt_options=['NOTIFY=FAILURE,DELAY'])
                     else:
