@@ -34,7 +34,7 @@ from email.header import Header, decode_header
 from email.mime.text import MIMEText
 
 
-DETAILS_TEMPLATE = u"""
+DEFAULT_DETAILS_TEMPLATE = u"""
 Selite: %(selite)s
 Saaja: Polyteknikkojen Kuoron kannatusyhdistys ry
 Pankkiyhteys: Nordea
@@ -51,10 +51,9 @@ Parhain terveisin,
   PKY
 """
 
-def compose_email(headers, greeting_msg, row_data):
+def compose_email(headers, message):
     """Compose email text"""
-    msg = MIMEText(greeting_msg + '\n' + DETAILS_TEMPLATE % row_data + FOOTER,
-                   _charset='utf-8')
+    msg = MIMEText(message, _charset='utf-8')
     for key, val in headers.iteritems():
         msg[key.capitalize()] = val
     return msg
@@ -220,6 +219,8 @@ def parse_args(argv):
     parser.add_argument('--smtp-server', help="Address of the SMTP server")
     parser.add_argument('-m', '--message',
                         help='Greeting message, used for all invoices')
+    parser.add_argument('--msg-details',
+                        help='Invoice details template')
     parser.add_argument('--subject',
                         help="Messgae subject, used for all invoices")
     parser.add_argument('--subject-prefix', metavar='PREFIX',
@@ -359,13 +360,31 @@ def main(argv=None):
             if args.message:
                 if os.path.isfile(args.message):
                     with open(args.message) as fobj:
-                        message = fobj.read()
+                        greeting_msg = fobj.read()
                 else:
-                    message = args.message
+                    greeting_msg = args.message
             else:
-                message = "Hei,\n\nOhessa lasku."
-                message = ask_value('Greeting message', default=message)
-            message = message.decode('string_escape').decode('utf-8')
+                greeting_msg = "Hei,\n\nOhessa lasku."
+                greeting_msg = ask_value('Greeting message',
+                                         default=greeting_msg)
+                greeting_msg = greeting_msg.decode('string_escape')
+            greeting_msg = greeting_msg.decode('utf-8')
+
+            # Get invoice details template
+            if args.msg_details:
+                if os.path.isfile(args.msg_details):
+                    with open(args.msg_details) as fobj:
+                        msg_details = fobj.read()
+                else:
+                    msg_details = args.msg_details
+                msg_details = msg_details.decode('utf-8')
+            else:
+                msg_details = DEFAULT_DETAILS_TEMPLATE
+
+            # Form message template
+            print type(greeting_msg)
+            print type(msg_details)
+            message = greeting_msg + u'\n' + msg_details + FOOTER
 
             # Email headers
             headers = {'from': utf8_address_header(sender)}
@@ -383,7 +402,7 @@ def main(argv=None):
 
             # Ask for confirmation
             headers['to'] = utf8_address_header(group[0]['email'])
-            example = compose_email(headers, message, group[0])
+            example = compose_email(headers, message % group[0])
             print '\n' + '-' * 79
             pprint_email(example)
             print '-' * 79 + '\n'
@@ -399,14 +418,15 @@ def main(argv=None):
                                  [cc[1] for cc in args.cc] + \
                                  [bcc[1] for bcc in args.bcc]
                     headers['to'] = utf8_address_header((to_name, to_email))
-                    msg = compose_email(headers, message, row)
-                    print "Sending email to <%s>..." % recipients[0]
+                    msg = compose_email(headers, message % row)
 
                     if not args.dry_run:
+                        print "Sending email to <%s>..." % recipients[0]
                         rsp = server.sendmail(sender[1],
                                         recipients, msg.as_string(),
                                         rcpt_options=['NOTIFY=FAILURE,DELAY'])
                     else:
+                        print "Would send email to <%s>..." % recipients[0]
                         rsp = 0
                     if rsp:
                         write_log_entry(log_f, 'FAILED', row)
