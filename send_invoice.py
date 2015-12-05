@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # vim:fileencoding=utf-8:et:ts=4:sw=4:sts=4
 #
-# Copyright (C) 2014 Markus Lehtonen <knaeaepae@gmail.com>
+# Copyright (C) 2014-2015 Markus Lehtonen <knaeaepae@gmail.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
