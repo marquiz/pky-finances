@@ -1,4 +1,4 @@
-[general]
+[DEFAULT]
 # Your (sender's) email
 #from = user@example.com
 
@@ -7,3 +7,11 @@
 
 # Prefix all email subject
 #subject-prefix = [PREFIX]
+
+
+# Settings for 'invoice' command
+[invoice]
+
+
+# Settings for 'message' command
+[message]
