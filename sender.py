@@ -137,7 +137,8 @@ def parse_config(path, command):
     """Read config file"""
     defaults = {'smtp-server': '',
                 'from': '',
-                'subject-prefix': ''}
+                'subject-prefix': '',
+                'log-dir': 'logs'}
     parser = ConfigParser(defaults)
     parser.add_section(command)
 
@@ -158,7 +159,7 @@ def parse_args(argv):
     parser = main_parser
     parser.add_argument('-d', '--dry-run', action='store_true',
                         help='Do everything but send email')
-    parser.add_argument('-l', '--log-dir', default='logs',
+    parser.add_argument('-l', '--log-dir',
                         help='Directory for log files')
     parser.add_argument('--from', dest='sender', type=split_email_address,
                         help="Sender's email")
@@ -265,7 +266,8 @@ def main(argv=None):
     subject_prefix = subject_prefix + ' ' if subject_prefix else ''
 
     # Open initialize log files
-    log_dir = os.path.join(os.path.dirname(argv[0]), args.log_dir)
+    log_dir = args.log_dir if args.log_dir else config['log-dir']
+    log_dir = os.path.join(os.path.dirname(argv[0]), log_dir)
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     log_f_basename = datetime.now().strftime('%Y-%m-%d-%H%M%S')

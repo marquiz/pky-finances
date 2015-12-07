@@ -8,6 +8,8 @@
 # Prefix all email subject
 #subject-prefix = [PREFIX]
 
+# Log directory
+#log-dir = logs
 
 # Settings for 'invoice' command
 [invoice]
