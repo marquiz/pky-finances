@@ -58,6 +58,17 @@ class CmdInvoice(CmdBase):
                 values.append(xrange(int(split[0]), int(split[1]) + 1))
         return values
 
+    def subject_prefix(self):
+        """Get subject prefif"""
+        if self.args.subject_prefix is not None:
+            subject_prefix = self.args.subject_prefix
+        elif self.args.reminder and 'reminder-subject-prefix' in self.config:
+            subject_prefix = self.config['reminder-subject-prefix']
+        else:
+            subject_prefix = self.config['subject-prefix']
+        subject_prefix = subject_prefix + ' ' if subject_prefix else ''
+        return subject_prefix
+
     def filter_data(self, rows):
         """Create message filters"""
         # Additional filters

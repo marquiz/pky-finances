@@ -13,6 +13,8 @@
 
 # Settings for 'invoice' command
 [invoice]
+# Special subject prefix for reminders
+#reminder-subject-prefix = [REMINDER PREFIX]
 
 
 # Settings for 'message' command

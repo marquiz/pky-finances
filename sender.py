@@ -218,7 +218,7 @@ def main(argv=None):
 
     args = parse_args(argv)
     config = parse_config(os.path.dirname(argv[0]), args.cmd_name)
-    cmd = args.cmd_class(args)
+    cmd = args.cmd_class(args, config)
 
     # Change email header encoding to QP for easier readability of raw data
     email.charset.add_charset('utf-8', email.charset.QP, email.charset.QP)
@@ -258,12 +258,7 @@ def main(argv=None):
 
     server = smtplib.SMTP(smtp_server)
 
-    # Get subject prefix
-    if args.subject_prefix is not None:
-        subject_prefix = args.subject_prefix
-    else:
-        subject_prefix = config['subject-prefix']
-    subject_prefix = subject_prefix + ' ' if subject_prefix else ''
+    subject_prefix = cmd.subject_prefix()
 
     # Open initialize log files
     log_dir = args.log_dir if args.log_dir else config['log-dir']

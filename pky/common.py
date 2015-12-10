@@ -34,8 +34,9 @@ class CmdBase(object):
     name = None
     log_fields = None
 
-    def __init__(self, args):
+    def __init__(self, args, config):
         self.args = args
+        self.config = config
 
 
     @staticmethod
@@ -74,6 +75,15 @@ class CmdBase(object):
                         yield row
                 else:
                     yield row
+
+    def subject_prefix(self):
+        """Get subject prefif"""
+        if self.args.subject_prefix is not None:
+            subject_prefix = self.args.subject_prefix
+        else:
+            subject_prefix = self.config['subject-prefix']
+        subject_prefix = subject_prefix + ' ' if subject_prefix else ''
+        return subject_prefix
 
     def filter_data(self, rows):
         """Filter data"""
