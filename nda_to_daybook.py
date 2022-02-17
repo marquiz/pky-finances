@@ -54,6 +54,8 @@ def parse_args(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('-H', '--human-readable', action='store_true',
                         help='Simple human readable output of the transactions')
+    parser.add_argument('-r', '--reverse', action='store_true',
+                        help='Print transactions in reverse order')
     parser.add_argument('nda',
                         help='Nordea bank statement in NDA format')
     return parser.parse_args(argv[1:])
@@ -64,6 +66,8 @@ def main(argv=None):
     args = parse_args(argv)
 
     trs = parse_transactions(args.nda)
+    if args.reverse:
+        trs = reversed(trs)
 
     if args.human_readable:
         for tra in trs:
