@@ -46,7 +46,7 @@ def parse_transactions(filepath):
                         'date': datetime.strptime(line[30:36], '%y%m%d'),
                         }
                 tr_list.append(new_tr)
-    return tr_list
+    return sorted(tr_list, key=lambda tr: tr['date'])
 
 
 def parse_args(argv):
