@@ -40,7 +40,7 @@ def parse_transactions(filepath):
                 new_tr = {
                         'index': int(line[6:12]),
                         'amount': amount,
-                        'amount_str': '%.2f' % amount,
+                        'amount_str': comma_float(amount, ':.2f'),
                         'name': nda_str_decode(line[108:143].strip()),
                         'reference': line[160:180].strip().lstrip('0'),
                         'date': datetime.strptime(line[30:36], '%y%m%d'),
@@ -60,6 +60,8 @@ def parse_args(argv):
                         help='Nordea bank statement in NDA format')
     return parser.parse_args(argv[1:])
 
+def comma_float(n,f=''):
+    return ('{'+f+'}').format(n).replace('.',',')
 
 def main(argv=None):
     """Script entry point"""
@@ -71,10 +73,10 @@ def main(argv=None):
 
     if args.human_readable:
         for tra in trs:
-            print('{:3d} {} {:+9.2f} {:6s} {}'.format(
+            print('{:3d} {} {} {:6s} {}'.format(
                     tra['index'],
                     tra['date'].strftime('%d.%m'),
-                    tra['amount'],
+                    comma_float(tra['amount'], ':+9.2f'),
                     tra['reference'],
                     tra['name']))
     else:
