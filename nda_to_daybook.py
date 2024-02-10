@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # vim:fileencoding=utf-8:et:ts=4:sw=4:sts=4
 #
 # Copyright (C) 2015 Markus Lehtonen <knaeaepae@gmail.com>
@@ -71,12 +71,12 @@ def main(argv=None):
 
     if args.human_readable:
         for tra in trs:
-            print '%3d %s %+9.2f %6s %s' % (
+            print('{:3d} {} {:+9.2f} {:6s} {}'.format(
                     tra['index'],
                     tra['date'].strftime('%d.%m'),
                     tra['amount'],
                     tra['reference'],
-                    tra['name'])
+                    tra['name']))
     else:
         writer = csv.writer(sys.stdout)
         for tra in trs:
